@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+#
+# setup_mac_m.sh - Provisionamento de um Mac com processador Apple Silicon (M1/M2/M3/M4)
+#
+# Idempotente: pode rodar mais de uma vez sem quebrar.
+# Uso: chmod +x setup_mac_m.sh && ./setup_mac_m.sh
+#
+set -euo pipefail
+
+# ------------------------------------------------------------------------------
+# Helpers de log
+# ------------------------------------------------------------------------------
+log()  { printf "\033[1;34m==>\033[0m %s\n" "$1"; }
+ok()   { printf "\033[1;32m ✓\033[0m %s\n" "$1"; }
+warn() { printf "\033[1;33m ! \033[0m%s\n" "$1"; }
+
+# ------------------------------------------------------------------------------
+# 0. Garante que estamos em Apple Silicon
+# ------------------------------------------------------------------------------
+if [[ "$(uname -m)" != "arm64" ]]; then
+  warn "Este script é específico para Macs Apple Silicon (arm64). Use o setup_mac_new.sh para Intel."
+  exit 1
+fi
+
+# ------------------------------------------------------------------------------
+# 1. Xcode Command Line Tools
+# ------------------------------------------------------------------------------
+if ! xcode-select -p >/dev/null 2>&1; then
+  log "Instalando Xcode Command Line Tools..."
+  xcode-select --install || true
+  warn "Conclua o instalador gráfico do Xcode CLT e rode este script novamente."
+  exit 1
+else
+  ok "Xcode Command Line Tools presentes."
+fi
+
+# ------------------------------------------------------------------------------
+# 2. Rosetta 2 (necessária para apps x86 ainda não portados para arm64)
+# ------------------------------------------------------------------------------
+if ! /usr/bin/pgrep -q oahd; then
+  log "Instalando Rosetta 2..."
+  softwareupdate --install-rosetta --agree-to-license
+  ok "Rosetta 2 instalada."
+else
+  ok "Rosetta 2 já presente."
+fi
+
+# ------------------------------------------------------------------------------
+# 3. Homebrew (Apple Silicon: sempre em /opt/homebrew)
+# ------------------------------------------------------------------------------
+if [[ ! -x /opt/homebrew/bin/brew ]]; then
+  log "Instalando Homebrew..."
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+# Carrega o brew no PATH da sessão atual e persiste no ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
+if ! grep -q '/opt/homebrew/bin/brew shellenv' "${HOME}/.zprofile" 2>/dev/null; then
+  echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "${HOME}/.zprofile"
+fi
+ok "Homebrew disponível: $(brew --version | head -n1)"
+
+log "Atualizando Homebrew..."
+brew update
+
+# ------------------------------------------------------------------------------
+# 4. Pacotes via Brewfile (brew bundle = idempotente)
+# ------------------------------------------------------------------------------
+BREWFILE="$(mktemp)"
+cat > "$BREWFILE" <<'BREW'
+# --- CLI / Ferramentas de desenvolvimento -----------------------------------
+brew "git"
+brew "fnm"              # gerenciador de versão do Node (rápido, auto-switch)
+brew "deno"             # runtime alternativo ao Node
+brew "mas"              # instalador da Mac App Store via CLI
+brew "starship"         # prompt customizável
+
+# --- Editores ----------------------------------------------------------------
+cask "visual-studio-code"
+cask "cursor"           # editor com IA
+
+# --- Terminal / API ----------------------------------------------------------
+cask "iterm2"
+cask "postman"
+cask "insomnia"
+cask "cyberduck"
+cask "flycut"
+
+# --- Containers --------------------------------------------------------------
+cask "docker-desktop"   # já traz a CLI do Docker (build arm64 nativo)
+
+# --- Comunicação / Produtividade --------------------------------------------
+cask "slack"
+cask "notion"
+cask "zoom"
+cask "microsoft-teams"
+cask "google-drive"
+cask "google-chrome"
+cask "alfred"
+BREW
+
+log "Instalando pacotes (brew bundle)..."
+brew bundle --file="$BREWFILE"
+rm -f "$BREWFILE"
+ok "Pacotes Homebrew instalados."
+
+# ------------------------------------------------------------------------------
+# 5. Node via fnm (não usar brew install node para evitar conflito)
+# ------------------------------------------------------------------------------
+if ! grep -q 'fnm env' "${HOME}/.zshrc" 2>/dev/null; then
+  log "Configurando fnm no ~/.zshrc..."
+  {
+    echo ''
+    echo '# fnm - Node version manager'
+    echo 'eval "$(fnm env --use-on-cd)"'
+  } >> "${HOME}/.zshrc"
+fi
+eval "$(fnm env)"
+log "Instalando Node LTS via fnm..."
+fnm install --lts
+fnm default "$(fnm current)"
+ok "Node ativo: $(node --version)"
+
+# ------------------------------------------------------------------------------
+# 6. Oh My Zsh (unattended, sem interromper o script)
+# ------------------------------------------------------------------------------
+if [[ ! -d "${HOME}/.oh-my-zsh" ]]; then
+  log "Instalando Oh My Zsh..."
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+else
+  ok "Oh My Zsh já instalado."
+fi
+
+# ------------------------------------------------------------------------------
+# 7. Claude Code CLI
+# ------------------------------------------------------------------------------
+if ! command -v claude >/dev/null 2>&1; then
+  log "Instalando Claude Code CLI..."
+  npm install -g @anthropic-ai/claude-code
+  ok "Claude Code instalado: $(claude --version 2>/dev/null || echo 'ok')"
+else
+  ok "Claude Code CLI já instalado."
+fi
+
+# ------------------------------------------------------------------------------
+# 8. Mac App Store (opcional - requer login na App Store)
+# ------------------------------------------------------------------------------
+if mas account >/dev/null 2>&1; then
+  log "Instalando apps da Mac App Store..."
+  mas install 937984704   # Amphetamine (mantém o Mac acordado)
+  mas install 1319778037  # iStat Menus  (ajuste/remova conforme quiser)
+  ok "Apps da App Store instalados."
+else
+  warn "Não logado na Mac App Store - pulando 'mas'. Faça login e rode 'mas install <id>'."
+fi
+
+echo ""
+ok "Setup concluído! Abra um novo terminal para carregar as configurações."
