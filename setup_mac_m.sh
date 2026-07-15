@@ -75,6 +75,20 @@ brew "deno"             # runtime alternativo ao Node
 brew "mas"              # instalador da Mac App Store via CLI
 brew "starship"         # prompt customizável
 brew "python"           # Python 3 mais recente (inclui pip3)
+brew "gh"               # GitHub CLI
+brew "uv"               # gerenciador de pacotes/ambientes Python (rápido)
+
+# --- CLIs modernas de terminal ----------------------------------------------
+brew "jq"               # processador de JSON
+brew "wget"
+brew "ripgrep"          # busca em arquivos (rg)
+brew "fzf"              # fuzzy finder
+brew "bat"              # cat com syntax highlight
+brew "eza"              # ls moderno
+brew "fd"               # find moderno
+brew "zoxide"           # cd inteligente (z)
+brew "tree"
+brew "htop"             # monitor de processos
 
 # --- Editores ----------------------------------------------------------------
 cask "visual-studio-code"
@@ -98,6 +112,10 @@ cask "microsoft-teams"
 cask "google-drive"
 cask "google-chrome"
 cask "alfred"
+cask "rectangle"        # gerenciador de janelas por atalho
+
+# --- Fontes ------------------------------------------------------------------
+cask "font-meslo-lg-nerd-font"  # necessária para os ícones do starship
 BREW
 
 log "Instalando pacotes (brew bundle)..."
@@ -133,7 +151,46 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 7. Claude Code CLI
+# 7. Integrações de shell no ~/.zshrc (starship, zoxide)
+# ------------------------------------------------------------------------------
+if ! grep -q 'starship init zsh' "${HOME}/.zshrc" 2>/dev/null; then
+  log "Configurando starship no ~/.zshrc..."
+  {
+    echo ''
+    echo '# starship - prompt'
+    echo 'eval "$(starship init zsh)"'
+  } >> "${HOME}/.zshrc"
+fi
+if ! grep -q 'zoxide init zsh' "${HOME}/.zshrc" 2>/dev/null; then
+  log "Configurando zoxide no ~/.zshrc..."
+  {
+    echo ''
+    echo '# zoxide - cd inteligente (use "z <pasta>")'
+    echo 'eval "$(zoxide init zsh)"'
+  } >> "${HOME}/.zshrc"
+fi
+ok "Integrações de shell configuradas."
+
+# ------------------------------------------------------------------------------
+# 8. Configuração básica do Git
+# ------------------------------------------------------------------------------
+git config --global init.defaultBranch main
+git config --global pull.rebase false
+git config --global push.autoSetupRemote true
+GITIGNORE_GLOBAL="${HOME}/.gitignore_global"
+if [[ ! -f "$GITIGNORE_GLOBAL" ]]; then
+  printf '.DS_Store\n.env\nnode_modules/\n__pycache__/\n.venv/\n' > "$GITIGNORE_GLOBAL"
+fi
+git config --global core.excludesfile "$GITIGNORE_GLOBAL"
+if [[ -z "$(git config --global user.name || true)" ]]; then
+  warn "Git sem user.name/user.email. Configure com:"
+  warn "  git config --global user.name \"Seu Nome\""
+  warn "  git config --global user.email \"voce@exemplo.com\""
+fi
+ok "Git configurado (defaults + .gitignore global)."
+
+# ------------------------------------------------------------------------------
+# 9. Claude Code CLI
 # ------------------------------------------------------------------------------
 if ! command -v claude >/dev/null 2>&1; then
   log "Instalando Claude Code CLI..."
@@ -144,7 +201,7 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 8. Mac App Store (opcional - requer login na App Store)
+# 10. Mac App Store (opcional - requer login na App Store)
 # ------------------------------------------------------------------------------
 if mas account >/dev/null 2>&1; then
   log "Instalando apps da Mac App Store..."
