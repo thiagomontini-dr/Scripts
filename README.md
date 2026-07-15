@@ -52,14 +52,14 @@ chmod +x setup_mac_new.sh && ./setup_mac_new.sh
 - **Homebrew** e atualização dos formulae
 - **CLI:** `git`, `gh` (GitHub CLI), `fnm`, `deno`, `mas`, `starship`
 - **Python:** Python 3 mais recente via Homebrew (inclui `pip3`) e `uv` (gerenciador de pacotes/ambientes)
-- **CLIs modernas de terminal:** `jq`, `wget`, `ripgrep`, `fzf`, `bat`, `eza`, `fd`, `zoxide`, `tree`, `htop`
+- **CLIs modernas de terminal:** `jq`, `wget`, `fzf`, `eza`, `fd`, `tree`, `htop`
 - **Fonte:** MesloLG Nerd Font (necessária para os ícones do `starship`)
 - **Editores:** Visual Studio Code, Cursor
 - **Terminal / API:** iTerm2, Postman, Insomnia, Cyberduck, Flycut
 - **Containers:** Docker Desktop
 - **Comunicação / Produtividade:** Slack, Notion, Zoom, Microsoft Teams, Google Drive, Google Chrome, Alfred, Rectangle
 - **Node.js** (LTS via `fnm`, com auto-switch por projeto)
-- **Oh My Zsh** (instalação unattended) + integração de `starship` e `zoxide` no `.zshrc`
+- **Oh My Zsh** (instalação unattended) + integração de `starship` no `.zshrc`
 - **Configuração básica do Git** (branch padrão `main`, `.gitignore` global)
 - **Claude Code CLI** (`@anthropic-ai/claude-code`)
 - **Apps da Mac App Store** via `mas` (opcional, requer login na App Store)
@@ -74,4 +74,4 @@ chmod +x setup_mac_new.sh && ./setup_mac_new.sh
 ## Datas
 
 - Criado em: 2026-07-15
-- Última atualização: 2026-07-15 (adicionado gh, uv, CLIs modernas, Nerd Font, Rectangle e config de shell/Git)
+- Última atualização: 2026-07-15 (removidos ripgrep, bat e zoxide)

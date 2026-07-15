@@ -63,12 +63,9 @@ brew "uv"               # gerenciador de pacotes/ambientes Python (rápido)
 # --- CLIs modernas de terminal ----------------------------------------------
 brew "jq"               # processador de JSON
 brew "wget"
-brew "ripgrep"          # busca em arquivos (rg)
 brew "fzf"              # fuzzy finder
-brew "bat"              # cat com syntax highlight
 brew "eza"              # ls moderno
 brew "fd"               # find moderno
-brew "zoxide"           # cd inteligente (z)
 brew "tree"
 brew "htop"             # monitor de processos
 
@@ -132,7 +129,7 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# 6. Integrações de shell no ~/.zshrc (starship, zoxide)
+# 6. Integrações de shell no ~/.zshrc (starship)
 # ------------------------------------------------------------------------------
 if ! grep -q 'starship init zsh' "${HOME}/.zshrc" 2>/dev/null; then
   log "Configurando starship no ~/.zshrc..."
@@ -140,14 +137,6 @@ if ! grep -q 'starship init zsh' "${HOME}/.zshrc" 2>/dev/null; then
     echo ''
     echo '# starship - prompt'
     echo 'eval "$(starship init zsh)"'
-  } >> "${HOME}/.zshrc"
-fi
-if ! grep -q 'zoxide init zsh' "${HOME}/.zshrc" 2>/dev/null; then
-  log "Configurando zoxide no ~/.zshrc..."
-  {
-    echo ''
-    echo '# zoxide - cd inteligente (use "z <pasta>")'
-    echo 'eval "$(zoxide init zsh)"'
   } >> "${HOME}/.zshrc"
 fi
 ok "Integrações de shell configuradas."
