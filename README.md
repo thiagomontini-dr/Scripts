@@ -51,6 +51,7 @@ chmod +x setup_mac_new.sh && ./setup_mac_new.sh
 - **Rosetta 2** (apenas no `setup_mac_m.sh`, para apps x86)
 - **Homebrew** e atualização dos formulae
 - **CLI:** `git`, `fnm`, `deno`, `mas`, `starship`
+- **Python:** Python 3 mais recente via Homebrew (inclui `pip3`)
 - **Editores:** Visual Studio Code, Cursor
 - **Terminal / API:** iTerm2, Postman, Insomnia, Cyberduck, Flycut
 - **Containers:** Docker Desktop
@@ -70,4 +71,4 @@ chmod +x setup_mac_new.sh && ./setup_mac_new.sh
 ## Datas
 
 - Criado em: 2026-07-15
-- Última atualização: 2026-07-15
+- Última atualização: 2026-07-15 (adicionado Python 3 + pip)

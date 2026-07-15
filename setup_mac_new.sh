@@ -56,6 +56,7 @@ brew "fnm"              # gerenciador de versão do Node (rápido, auto-switch)
 brew "deno"             # runtime alternativo ao Node
 brew "mas"              # instalador da Mac App Store via CLI
 brew "starship"         # prompt customizável
+brew "python"           # Python 3 mais recente (inclui pip3)
 
 # --- Editores ----------------------------------------------------------------
 cask "visual-studio-code"
